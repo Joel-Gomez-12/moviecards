@@ -4,23 +4,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: empaquetado
-      run: echo "empaquetado"
+        - name: empaquetado
+          run: echo "empaquetado"
   test:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: pruebas
-      run: echo "pruebas"
+        run: echo "pruebas"
   qa:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - name: calidad
-    run: echo "calidad"
-  deploy:
+        run: echo "calidad"
+  deploy  :
     needs: qa
     runs-on: ubuntu-latest
     steps:
       - name: despliegue
-    run: echo "despliegue"
+        run: echo "despliegue"
