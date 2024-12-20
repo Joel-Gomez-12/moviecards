@@ -47,7 +47,8 @@ jobs:
             https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
 
             curl -L -o chromedriver.zip 
-            https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
+            https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chr
+            omedriver_linux64.zip
             
             unzip chromedriver.zip
             
@@ -57,7 +58,7 @@ jobs:
 
       - name: Ejecutar la aplicación para pruebas end to end
         run: mvn spring-boot:run & sleep 60
-        
+
       - name: Ejecutar las pruebas unitarias, de integración y end to end
         run: mvn clean verify
 
