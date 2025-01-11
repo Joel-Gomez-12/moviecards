@@ -15,4 +15,10 @@ public class MovieCardsApplication {
         SpringApplication.run(MovieCardsApplication.class, args);
     }
 
+    @Bean
+    public RestTemplate template() {
+        RestTemplate template = new RestTemplate();
+        return template;
+    }
+
 }
