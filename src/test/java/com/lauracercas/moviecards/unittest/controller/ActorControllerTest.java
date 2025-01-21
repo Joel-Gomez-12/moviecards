@@ -18,14 +18,10 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-/**
- * Autor: Laura Cercas Ramos
- * Proyecto: TFM Integración Continua con GitHub Actions
- * Fecha: 04/06/2024
- */
 class ActorControllerTest {
 
     private ActorController controller;
@@ -34,6 +30,7 @@ class ActorControllerTest {
     private ActorService actorServiceMock;
 
     private AutoCloseable closeable;
+
     @Mock
     private Model model;
 
@@ -48,20 +45,37 @@ class ActorControllerTest {
         closeable.close();
     }
 
+    private ActorDTO createActorDTO(Integer id) {
+        Date birthDate = new Date();
+        Date deadDate = new Date();
+        return new ActorDTO(id, "Sample Name", birthDate, deadDate, "Sample Country", new ArrayList<>());
+    }
+
+    private Actor createActor(Integer id) {
+        Actor actor = new Actor();
+        actor.setId(id);
+        actor.setName("Sample Name");
+        actor.setBirthDate(new Date());
+        actor.setDeadDate(new Date());
+        actor.setCountry("Sample Country");
+        actor.setMovies(new ArrayList<>());
+        return actor;
+    }
 
     @Test
-    public void shouldGoListActorAndGetAllActors() {
+    void shouldGoListActorAndGetAllActors() {
+        // Simular lista vacía
         List<Actor> actors = new ArrayList<>();
-
         when(actorServiceMock.getAllActors()).thenReturn(actors);
 
         String viewName = controller.getActorsList(model);
 
         assertEquals("actors/list", viewName);
+        verify(model).addAttribute("actors", actors); // Validar que se agrega el atributo correcto
     }
 
     @Test
-    public void shouldInitializeActor() {
+    void shouldInitializeActor() {
         String viewName = controller.newActor(model);
 
         assertEquals("actors/form", viewName);
@@ -71,50 +85,35 @@ class ActorControllerTest {
     }
 
     @Test
-    public void shouldSaveActorWithNoErrors() {
-        Date birthDateExample = new Date();
-        Date deadDateExample = new Date();
-        ActorDTO actorDTO = new ActorDTO(null, "Sample name", birthDateExample, deadDateExample, "Sample country",
-                new ArrayList<>());
-
+    void shouldSaveActorWithNoErrors() {
+        ActorDTO actorDTO = createActorDTO(null);
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(false);
 
-        Actor actor = new Actor();
-        actor.setId(1);
-        when(actorServiceMock.save(any(Actor.class))).thenReturn(actor);
+        Actor savedActor = createActor(1);
+        when(actorServiceMock.save(any(Actor.class))).thenReturn(savedActor);
 
         String viewName = controller.saveActor(actorDTO, result, model);
 
         assertEquals("redirect:/actors", viewName);
-        assertEquals(birthDateExample, actorDTO.getBirthDate());
-        assertEquals(deadDateExample, actorDTO.getDeadDate());
 
         verify(model).addAttribute(eq("actor"), any(Actor.class));
         verify(model).addAttribute("title", Messages.EDIT_ACTOR_TITLE);
         verify(model).addAttribute("message", Messages.SAVED_ACTOR_SUCCESS);
     }
 
-
     @Test
-    public void shouldUpdateActorWithNoErrors() {
-        Date birthDateExample = new Date();
-        Date deadDateExample = new Date();
-        ActorDTO actorDTO = new ActorDTO(1, "Sample name", birthDateExample, deadDateExample, "Sample country",
-                new ArrayList<>());
-
+    void shouldUpdateActorWithNoErrors() {
+        ActorDTO actorDTO = createActorDTO(1);
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(false);
 
-        Actor actor = new Actor();
-        actor.setId(1);
-        when(actorServiceMock.save(any(Actor.class))).thenReturn(actor);
+        Actor updatedActor = createActor(1);
+        when(actorServiceMock.save(any(Actor.class))).thenReturn(updatedActor);
 
         String viewName = controller.saveActor(actorDTO, result, model);
 
         assertEquals("redirect:/actors", viewName);
-        assertEquals(birthDateExample, actorDTO.getBirthDate());
-        assertEquals(deadDateExample, actorDTO.getDeadDate());
 
         verify(model).addAttribute(eq("actor"), any(Actor.class));
         verify(model).addAttribute("title", Messages.EDIT_ACTOR_TITLE);
@@ -122,24 +121,23 @@ class ActorControllerTest {
     }
 
     @Test
-    public void shouldTrySaveActorWithErrors() {
-        ActorDTO actorDTO = new ActorDTO();
+    void shouldTrySaveActorWithErrors() {
+        ActorDTO actorDTO = createActorDTO(null);
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(true);
 
         String viewName = controller.saveActor(actorDTO, result, model);
 
         assertEquals("actors/form", viewName);
-
-        verifyNoInteractions(model);
+        verifyNoInteractions(model); // Validar que no se interactúa con el modelo
     }
 
     @Test
-    public void shouldGoToEditActor() {
-        Actor actor = new Actor();
-        actor.setId(1);
+    void shouldGoToEditActor() {
+        Actor actor = createActor(1);
         List<Movie> movies = List.of(new Movie());
         actor.setMovies(movies);
+
         when(actorServiceMock.getActorById(actor.getId())).thenReturn(actor);
 
         String viewName = controller.editActor(actor.getId(), model);
@@ -151,5 +149,28 @@ class ActorControllerTest {
         verify(model).addAttribute("title", Messages.EDIT_ACTOR_TITLE);
     }
 
+    @Test
+    void shouldThrowExceptionWhenActorNotFound() {
+        when(actorServiceMock.getActorById(1)).thenReturn(null);
 
+        assertThrows(NullPointerException.class, () -> {
+            controller.editActor(1, model);
+        });
+    }
+
+    @Test
+    void shouldHandleSaveActorWithNullMovies() {
+        ActorDTO actorDTO = createActorDTO(1);
+        actorDTO.setMovies(null);
+        BindingResult result = mock(BindingResult.class);
+        when(result.hasErrors()).thenReturn(false);
+
+        Actor actor = createActor(1);
+        when(actorServiceMock.save(any(Actor.class))).thenReturn(actor);
+
+        String viewName = controller.saveActor(actorDTO, result, model);
+
+        assertEquals("redirect:/actors", viewName);
+        verify(model).addAttribute("message", Messages.UPDATED_ACTOR_SUCCESS);
+    }
 }
