@@ -93,7 +93,7 @@ jobs:
   stage:
     needs: qa
     runs-on: ubuntu-latest
-    if: steps.validate-quality-gate.outcome == 'success'
+    if: success()
     environment:
       name: 'Staging'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
