@@ -1,6 +1,7 @@
 package com.lauracercas.moviecards.unittest.controller;
 
 import com.lauracercas.moviecards.controller.MovieController;
+import com.lauracercas.moviecards.dto.MovieDTO;
 import com.lauracercas.moviecards.model.Actor;
 import com.lauracercas.moviecards.model.Movie;
 import com.lauracercas.moviecards.service.movie.MovieService;
@@ -72,35 +73,39 @@ class MovieControllerTest {
 
     @Test
     public void shouldSaveMovieWithNoErrors() {
-        Movie movie = new Movie();
+        MovieDTO movieDTO = new MovieDTO();
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(false);
 
+        Movie movie = new Movie();
         when(movieServiceMock.save(any(Movie.class))).thenReturn(movie);
 
-        String viewName = controller.saveMovie(movie, result, model);
+        String viewName = controller.saveMovie(movieDTO, result, model);
 
-        assertEquals("movies/form", viewName);
+        assertEquals("redirect:/movies", viewName);
 
-        verify(model).addAttribute("movie", movie);
+        verify(model).addAttribute(eq("movie"), any(Movie.class));
         verify(model).addAttribute("title", Messages.EDIT_MOVIE_TITLE);
         verify(model).addAttribute("message", Messages.SAVED_MOVIE_SUCCESS);
     }
 
     @Test
     public void shouldUpdateMovieWithNoErrors() {
-        Movie movie = new Movie();
-        movie.setId(1);
+        MovieDTO movieDTO = new MovieDTO();
+        movieDTO.setId(1);
+
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(false);
 
+        Movie movie = new Movie();
+        movie.setId(1);
         when(movieServiceMock.save(any(Movie.class))).thenReturn(movie);
 
-        String viewName = controller.saveMovie(movie, result, model);
+        String viewName = controller.saveMovie(movieDTO, result, model);
 
-        assertEquals("movies/form", viewName);
+        assertEquals("redirect:/movies", viewName);
 
-        verify(model).addAttribute("movie", movie);
+        verify(model).addAttribute(eq("movie"), any(Movie.class));
         verify(model).addAttribute("title", Messages.EDIT_MOVIE_TITLE);
         verify(model).addAttribute("message", Messages.UPDATED_MOVIE_SUCCESS);
     }
@@ -108,11 +113,11 @@ class MovieControllerTest {
 
     @Test
     public void shouldTrySaveMovieWithErrors() {
-        Movie movie = new Movie();
+        MovieDTO movieDTO = new MovieDTO();
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(true);
 
-        String viewName = controller.saveMovie(movie, result, model);
+        String viewName = controller.saveMovie(movieDTO, result, model);
 
         assertEquals("movies/form", viewName);
 

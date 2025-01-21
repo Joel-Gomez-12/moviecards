@@ -61,7 +61,6 @@ jobs:
   qa:
     needs: test
     runs-on: self-hosted
-    continue-on-error : true
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v2
@@ -76,12 +75,25 @@ jobs:
         run: mvn clean package -DskipTests
 
       - name: Revisar la calidad con Sonarqube
+        id: sonarqube
         run: |
           mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=admin
+      
+      - name: Validar calidad del código
+        id: validate-quality-gate
+        run: |
+          STATUS=$(curl -s -u admin:admin "http://localhost:9000/api/qualitygates/project_status?projectKey=my_project_key" | jq -r '.projectStatus.status')
+          echo "Quality Gate Status: $STATUS"
+          if [ "$STATUS" != "OK" ]; then
+            echo "Quality Gate failed. Stopping pipeline."
+            exit 1
+          fi
+        
   
   stage:
     needs: qa
     runs-on: ubuntu-latest
+    if: steps.validate-quality-gate.outcome == 'success'
     environment:
       name: 'Staging'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
