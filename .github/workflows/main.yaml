@@ -61,7 +61,6 @@ jobs:
   qa:
     needs: test
     runs-on: self-hosted
-    continue-on-error : true
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v2
@@ -76,12 +75,14 @@ jobs:
         run: mvn clean package -DskipTests
 
       - name: Revisar la calidad con Sonarqube
+        id: sonarqube
         run: |
-          mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=admin
+          mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.qualitygate.wait=true -Dsonar.login=admin -Dsonar.password=admin  
   
   stage:
     needs: qa
     runs-on: ubuntu-latest
+    if: success()
     environment:
       name: 'Staging'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
