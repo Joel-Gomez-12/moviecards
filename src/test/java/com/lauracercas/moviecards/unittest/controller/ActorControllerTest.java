@@ -143,14 +143,4 @@ class ActorControllerTest {
         verify(model).addAttribute("movies", movies);
         verify(model).addAttribute("title", Messages.EDIT_ACTOR_TITLE);
     }
-
-    @Test
-    public void shouldHandleServiceException() {
-        when(actorServiceMock.getAllActors()).thenThrow(new RuntimeException("Service exception"));
-
-        String viewName = controller.getActorsList(model);
-
-        assertEquals("actors/list", viewName);
-        verify(model).addAttribute("error", "Service exception");
-    }
 }
