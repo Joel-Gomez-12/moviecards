@@ -1,6 +1,7 @@
 package com.lauracercas.moviecards.unittest.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,7 +49,6 @@ public class ActorTest {
         String countryExample = "Sample country";
         actor.setCountry(countryExample);
         assertEquals(countryExample, actor.getCountry());
-
     }
 
     @Test
@@ -58,4 +58,26 @@ public class ActorTest {
         assertEquals(moviesExample, actor.getMovies());
     }
 
+    @Test
+    void testConstructor() {
+        Integer idExample = 1;
+        String nameExample = "Sample name";
+        Actor actor = new Actor(idExample, nameExample);
+        assertEquals(idExample, actor.getId());
+        assertEquals(nameExample, actor.getName());
+    }
+
+    @Test
+    void testEquals() {
+        Actor actor1 = new Actor(1, "Sample name");
+        Actor actor2 = new Actor(1, "Sample name");
+        assertEquals(actor1, actor2);
+    }
+
+    @Test
+    void testHashCode() {
+        Actor actor1 = new Actor(1, "Sample name");
+        Actor actor2 = new Actor(1, "Sample name");
+        assertEquals(actor1.hashCode(), actor2.hashCode());
+    }
 }

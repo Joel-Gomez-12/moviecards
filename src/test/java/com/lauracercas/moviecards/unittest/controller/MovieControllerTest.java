@@ -21,11 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-/**
- * Autor: Laura Cercas Ramos
- * Proyecto: TFM Integración Continua con GitHub Actions
- * Fecha: 04/06/2024
- */
 class MovieControllerTest {
 
     private MovieController controller;
@@ -36,7 +31,6 @@ class MovieControllerTest {
 
     @Mock
     private Model model;
-
 
     @BeforeEach
     void setUp() {
@@ -59,7 +53,6 @@ class MovieControllerTest {
 
         assertEquals("movies/list", viewName);
     }
-
 
     @Test
     public void shouldInitializeMovie() {
@@ -110,7 +103,6 @@ class MovieControllerTest {
         verify(model).addAttribute("message", Messages.UPDATED_MOVIE_SUCCESS);
     }
 
-
     @Test
     public void shouldTrySaveMovieWithErrors() {
         MovieDTO movieDTO = new MovieDTO();
@@ -123,7 +115,6 @@ class MovieControllerTest {
 
         verifyNoInteractions(model);
     }
-
 
     @Test
     public void shouldGoToEditMovie() {
@@ -142,4 +133,13 @@ class MovieControllerTest {
         verify(model).addAttribute("title", Messages.EDIT_MOVIE_TITLE);
     }
 
+    @Test
+    public void shouldHandleServiceException() {
+        when(movieServiceMock.getAllMovies()).thenThrow(new RuntimeException("Service exception"));
+
+        String viewName = controller.getMoviesList(model);
+
+        assertEquals("movies/list", viewName);
+        verify(model).addAttribute("error", "Service exception");
+    }
 }
